@@ -8,12 +8,20 @@ cv4/
 ├── Makefile
 ├── README.md
 ├── OBHAJOBA.md
-└── kalendar/
-    ├── Makefile
-    ├── svatky.hpp      jmeniny + pole dní v měsíci + najdi_svatek()
-    ├── kalendar1.cpp   1 potomek,  1 roura
-    ├── kalendar2.cpp   2 potomci,  1 roura
-    └── kalendar3.cpp   3 potomci,  2 roury
+├── kalendar/
+│   ├── Makefile
+│   ├── svatky.hpp      jmeniny + pole dní v měsíci + najdi_svatek()
+│   ├── kalendar1.cpp   1 potomek,  1 roura
+│   ├── kalendar2.cpp   2 potomci,  1 roura
+│   └── kalendar3.cpp   3 potomci,  2 roury
+└── varianty/           možná rozšíření pro skutečné zadání
+    ├── README.md       popis a testování všech variant
+    ├── v1_exec.cpp             dup2 + exec (potomek = sort)
+    ├── v2_dva_generatory.cpp   dva zapisovatelé, jedna roura
+    ├── v3_fifo_gen.cpp         pojmenovaná roura - zapisovatel
+    ├── v3_fifo_cti.cpp         pojmenovaná roura - čtenář
+    ├── v4_poll.cpp             čtení ze dvou rour přes poll()
+    └── v5_signaly.cpp          Ctrl-C a SIGUSR1
 ```
 
 ```bash

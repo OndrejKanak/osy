@@ -2,12 +2,12 @@
 #
 # Zastresujici Makefile ctvrteho cviceni
 #
-#     make          ... prelozi kalendar1, kalendar2, kalendar3
+#     make          ... prelozi kalendar1-3 a vsechny varianty
 #     make clean    ... uklidi .o a spustitelne soubory
 #
 ##############################################################################
 
-DIRS = kalendar
+DIRS = kalendar varianty
 
 .PHONY: all clean $(DIRS)
 

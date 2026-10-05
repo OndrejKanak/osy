@@ -66,3 +66,61 @@ Je to vidět při `./kalendar3 50 20 | head -2` — potomky ukončí `SIGPIPE` (
 **Proč generátor používá `usleep()`?**
 Zadání chce data posílat pomalu, aby bylo vidět, jak putují mezi procesy.
 `usleep( 1000000 / N )` čeká mikrosekundy, takže `N` datumů za sekundu.
+
+---
+
+# Varianty (možná rozšíření)
+
+**Co dělá `dup2( a, b )`?**
+Zavře deskriptor `b` a udělá z něj kopii `a`. `dup2( roura[0], 0 )` tedy
+přesměruje stdin na rouru. Původní `roura[0]` se pak zavře, aby rouru
+nedržely dva deskriptory.
+
+**Co dělá `exec`?**
+Nahradí program běžícího procesu jiným programem. PID zůstane, otevřené
+deskriptory taky — proto `sort` po `dup2` čte z roury, aniž by o tom věděl.
+Když `exec` uspěje, nikdy se nevrátí. Kód za ním běží jen při chybě.
+
+**Proč se se `sort` vypíše všechno až na konci?**
+`sort` musí mít všechny řádky, než může vypsat první. Čte tedy, dokud
+nedostane konec roury.
+
+**Co se stane, když dva procesy zapisují do jedné roury?**
+Řádky se střídají, ale zápis do `PIPE_BUF` (4 kB na Linuxu) je atomický,
+takže se nerozbijí uprostřed. Čtenář dostane EOF, až zavřou oba.
+
+**Čím se liší pojmenovaná roura od `pipe()`?**
+`pipe()` zdědí jen potomci přes `fork()`. Pojmenovaná roura (`mkfifo`) je
+soubor v adresáři, otevřít ji může kterýkoli proces, který zná jméno.
+Data se předávají v paměti stejně jako u `pipe()`.
+
+**Proč `open()` na FIFO čeká?**
+Otevření pro čtení čeká na zapisovatele a naopak. Teprve když jsou připojené
+obě strany, `open()` se vrátí.
+
+**K čemu je `poll()`?**
+Čeká na více deskriptorů najednou a vrátí se, když je kterýkoli připravený.
+Bez něj by se `read()` zablokoval na jedné rouře, i když ve druhé už data jsou.
+
+**Proč se s `poll()` nepoužívá `fgets()`?**
+stdio si načte data do svého bufferu. `poll()` o něm neví, hlásí jen data,
+která jsou ještě v rouře. Celý řádek by mohl ležet v bufferu a `poll()` by
+na něj zbytečně čekal.
+
+**Komu pošle `Ctrl-C` signál?**
+Terminál pošle `SIGINT` celé skupině procesů v popředí — rodiči i všem
+potomkům najednou.
+
+**Jak ukončíš kolonu procesů tak, aby se neztratila data?**
+Potomci `SIGINT` ignorují. Rodič ho zachytí a pošle `SIGTERM` jen prvnímu
+procesu (generátoru). Ten zavře rouru, další dostane EOF, zpracuje zbytek,
+zavře svou rouru a tak dál. Kolona se vyprázdní zepředu dozadu.
+
+**Co smí obsluha signálu dělat?**
+Jen *async-signal-safe* funkce, například `write()` nebo `kill()`. Ne
+`printf()` ani `malloc()`. Nejbezpečnější je jen nastavit příznak typu
+`volatile sig_atomic_t`.
+
+**Co je `SA_RESTART`?**
+Když signál přeruší systémové volání (`read`, `waitpid`), jádro ho samo
+zopakuje. Bez toho by vrátilo `-1` a `errno == EINTR`.
