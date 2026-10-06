@@ -69,6 +69,37 @@ Zadání chce data posílat pomalu, aby bylo vidět, jak putují mezi procesy.
 
 ---
 
+# Zadání — kalendar4
+
+**Jak jsi zajistil, že kód 3. a 5. potomka je stejný?**
+Oba volají funkci `vypis_s_cisly( fd, kdo )`. Liší se jen deskriptorem roury,
+ze které čtou, a popiskem do výpisu. Funguje to, protože potomek 4 posílá
+řádky ve stejném tvaru jako potomek 2: `den.mesic. Jmeno`.
+
+**Kolik je tu rour a kolik konců musí každý proces zavřít?**
+Čtyři roury = osm deskriptorů. Každý proces si nechá jen ty, které používá
+(nejvýš dva), zbytek zavře funkcí `zavri_roury_krome()`. Rodič zavře všech osm.
+
+**Co by se stalo, kdyby potomek 3 nezavřel `C[1]`?**
+Roura C by měla otevřený zápisový konec i po skončení potomka 1. Potomek 4
+by nikdy nedostal EOF, nezavřel by D, potomek 5 by čekal navždy a rodič by
+visel ve `waitpid()`.
+
+**Jak potomek 4 najde datum ke jménu?**
+Projde seznam `g_svatky` a porovná jméno (`strcmp`) se druhým sloupcem.
+Vrátí datum z prvního sloupce. Je to opak `najdi_svatek()`.
+
+**Proč se výpisy P3 a P5 střídají?**
+Jsou to dva nezávislé procesy, které píšou na stejný terminál. Pořadí určuje
+plánovač jádra. Každý `printf` s `fflush` vypíše celý řádek najednou, takže
+se řádky nerozbijí.
+
+**Proč potomek 1 zapisuje do dvou rour?**
+Zadání chce, aby posílal data potomkovi 2 a jména potomkovi 4. V jedné
+smyčce vždy zapíše datum do A a jméno do C. Nakonec zavře obě roury.
+
+---
+
 # Varianty (možná rozšíření)
 
 **Co dělá `dup2( a, b )`?**

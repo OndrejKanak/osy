@@ -13,7 +13,8 @@ cv4/
 │   ├── svatky.hpp      jmeniny + pole dní v měsíci + najdi_svatek()
 │   ├── kalendar1.cpp   1 potomek,  1 roura
 │   ├── kalendar2.cpp   2 potomci,  1 roura
-│   └── kalendar3.cpp   3 potomci,  2 roury
+│   ├── kalendar3.cpp   3 potomci,  2 roury
+│   └── kalendar4.cpp   ZADÁNÍ: 5 potomků, 4 roury
 └── varianty/           možná rozšíření pro skutečné zadání
     ├── README.md       popis a testování všech variant
     ├── v1_exec.cpp             dup2 + exec (potomek = sort)
@@ -110,6 +111,89 @@ rodic: potomek 3 (513) skoncil se stavem 0
 ```
 
 ---
+
+## Zadání — `kalendar4`: pět potomků, čtyři roury
+
+> Upravte si příklad z přípravy tak, aby se přidaly 2 roury a dva potomci.
+> První potomek bude posílat data druhému potomkovi a náhodně vybraná jména
+> čtvrtému potomkovi. Čtvrtý potomek doplní ke jménu správné datum a pošle
+> pátému potomkovi. Kód třetího a pátého potomka by měl být stejný.
+
+```
+                         +-------+
+                         | RODIČ |
+                         +---+---+
+         +---------+---------+---------+---------+
+         v         v         v         v         v
+       +----+    +----+    +----+    +----+    +----+
+       | P1 |    | P2 |    | P3 |    | P4 |    | P5 |
+       +----+    +----+    +----+    +----+    +----+
+
+  P1 --A--> P2 --B--> P3 --> stdout     datum -> doplnit jméno -> výpis
+  P1 --C--> P4 --D--> P5 --> stdout     jméno -> doplnit datum -> výpis
+```
+
+| proces | čte | zapisuje | dělá |
+|---|---|---|---|
+| P1 | — | A, C | náhodné datum `den.mesic\n` do A, náhodné jméno `Jmeno\n` do C |
+| P2 | A | B | doplní jméno → `den.mesic. Jmeno\n` |
+| P3 | B | stdout | `vypis_s_cisly( B, "P3" )` |
+| P4 | C | D | doplní datum → `den.mesic. Jmeno\n` (stejný tvar jako P2) |
+| P5 | D | stdout | `vypis_s_cisly( D, "P5" )` — **stejná funkce** jako P3 |
+| rodič | — | — | vytvoří roury a potomky, zavře roury, čeká |
+
+```bash
+./kalendar/kalendar4 4 2
+```
+
+```
+P3 (1) 14.11. Sava
+P5 (1) 1.10. Igor
+P5 (2) 23.12. Vlasta
+P3 (2) 14.10. Agata
+P5 (3) 6.9. Boleslav
+P3 (3) 13.11. Tibor
+P5 (4) 4.10. Frantisek
+P3 (4) 27.5. Valdemar
+rodic: potomek 1 (403) skoncil se stavem 0
+...
+rodic: potomek 5 (407) skoncil se stavem 0
+```
+
+**Proč může být kód P3 a P5 společný:** P4 posílá řádky ve **stejném tvaru**
+jako P2 (`den.mesic. Jmeno`). Vypisující potomek tak nemusí vědět, odkud data
+přišla — dostane jen deskriptor roury a popisek do výpisu.
+
+**Zavírání rour:** s osmi konci by bylo psaní `close()` v každém potomkovi
+nepřehledné, proto je tu funkce `zavri_roury_krome( a, b )`. Zavře všech osm
+konců kromě dvou, které proces potřebuje:
+
+| proces | nechá otevřené |
+|---|---|
+| P1 | `A[1]`, `C[1]` |
+| P2 | `A[0]`, `B[1]` |
+| P3 | `B[0]` |
+| P4 | `C[0]`, `D[1]` |
+| P5 | `D[0]` |
+| rodič | nic — `zavri_roury_krome( -1, -1 )` |
+
+**Jméno „Statni svatek“** je v seznamu dvakrát (28.10. a 17.11.). P4 vrátí
+první nalezené datum, které je pro to jméno taky správné.
+
+**Ověření správnosti** — 3000 datumů a 3000 jmen, každá dvojice datum–jméno
+musí být v seznamu svátků:
+
+```bash
+./kalendar/kalendar4 3000 100000 2>/dev/null | grep -c '?'     # 0
+```
+
+**Ověření zavřených rour** — za běhu v druhém terminálu:
+
+```bash
+for p in $(pgrep -x kalendar4); do echo "$p: $(ls -l /proc/$p/fd | grep -c pipe) rour"; done
+```
+
+Rodič 0, P1 2, P2 2, P3 1, P4 2, P5 1.
 
 ## Struktura kódu: žádné vnořené `if`
 
