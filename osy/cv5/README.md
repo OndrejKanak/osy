@@ -13,11 +13,19 @@ cv5/
 ├── Makefile
 ├── README.md
 ├── OBHAJOBA.md
-└── kolona/
-    ├── Makefile
-    ├── kolona1.cpp   1. krok: 3 potomci, všichni přes exec
-    ├── kolona2.cpp   2. krok: druhý potomek čísluje řádky sám
-    └── kolona3.cpp   3. krok: volitelný výstupní soubor
+├── kolona/
+│   ├── Makefile
+│   ├── kolona1.cpp   1. krok: 3 potomci, všichni přes exec
+│   ├── kolona2.cpp   2. krok: druhý potomek čísluje řádky sám
+│   └── kolona3.cpp   3. krok: volitelný výstupní soubor
+└── varianty/         možná rozšíření pro skutečné zadání (viz varianty/README.md)
+    ├── vlastni.hpp             vlastní nl, tr, head, grep, wc, uniq, sort
+    ├── v1_ctyri_procesy.cpp    + čtvrtý potomek (head)
+    ├── v2_vlastni.cpp          příkazy nahrazené vlastním kódem
+    ├── v3_rozvetveni.cpp       jeden zdroj, dvě větve (sort / sort -r)
+    ├── v4_parametry.cpp        stdin, >>, 2>, oddělovač z parametru
+    ├── v5_obecna_kolona.cpp    libovolná kolona z parametrů (cyklus)
+    └── v6_stavy.cpp            waitpid a hlášení, jak potomci skončili
 ```
 
 ```bash

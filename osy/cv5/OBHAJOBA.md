@@ -68,3 +68,49 @@ přesně chování `>` v shellu. `0644` jsou práva nového souboru `rw-r--r--`.
 Pořadí `sort` závisí na locale (`LANG`, `LC_ALL`). Program ale `sort`
 spouští se stejným prostředím jako shell, takže na stejném počítači je
 pořadí vždy stejné.
+
+---
+
+# Varianty (možná rozšíření)
+
+**Jak přidáš do kolony další příkaz?**
+Další rouru, další blok `if ( fork() == 0 )` se dvěma `dup2` a `execlp`,
+a o jeden `wait` víc. Všichni (i rodič) musí zavřít i konce nové roury.
+
+**Proč po `dup2` můžou potomci zavřít úplně všechny roury?**
+Rouru, kterou potřebují, už mají zkopírovanou na deskriptoru 0 nebo 1.
+Původní deskriptory z `pipe()` jsou zbytečné a jen by držely rouru otevřenou.
+
+**Jak nahradíš příkaz vlastním kódem?**
+Přesměrování zůstane stejné, jen místo `execlp` zavolám funkci, která čte
+stdin a píše stdout, a pak `exit( 0 )`. Funkce neví, že čte z roury.
+
+**Jak by vypadal vlastní `sort`?**
+Načíst všechny řádky do dynamického pole (`getline`, `realloc`), seřadit
+`qsort` a vypsat. Porovnávat `strcoll` (podle jazyka), protože tak řadí
+program `sort`; bez `setlocale( LC_ALL, "" )` by `strcoll` řadil jako ASCII.
+
+**Jak pošle jeden proces data do dvou rour?**
+Každý přečtený blok zapíše `write()` do obou. To je vlastní `tee`.
+
+**Jaký je rozdíl mezi `O_TRUNC` a `O_APPEND`?**
+`O_TRUNC` soubor při otevření zkrátí na nulu (`>`), `O_APPEND` zapisuje vždy
+na konec (`>>`).
+
+**Jak přesměruješ chyby potomka?**
+`dup2( fd, 2 )` — deskriptor 2 je stderr. Hlášky z `perror` pak jdou do
+souboru.
+
+**Jak se vytváří kolona v cyklu?**
+Rodič si drží jen čtecí konec předchozí roury. V každém kroku vytvoří novou
+rouru, potomek si vezme předchozí jako stdin a novou jako stdout. Rodič pak
+zavře předchozí a zápisový konec nové; čtecí konec nové si nechá pro
+dalšího potomka.
+
+**Co znamená návratový kód 127?**
+Konvence shellu pro „program nenalezen“. Potomek ho vrací, když `exec`
+selže.
+
+**Proč dostanou potomci `SIGPIPE`, když kolonu pošlu do `head`?**
+`head` po pár řádcích skončí a zavře rouru. Kdo do ní pak zapisuje, dostane
+`SIGPIPE`, skončí a zavře svou rouru — a tak dál až k prvnímu procesu.

@@ -2,12 +2,12 @@
 #
 # Zastresujici Makefile pateho cviceni
 #
-#     make          ... prelozi kolona1, kolona2, kolona3
+#     make          ... prelozi kolona1-3 a vsechny varianty
 #     make clean    ... uklidi .o a spustitelne soubory
 #
 ##############################################################################
 
-DIRS = kolona
+DIRS = kolona varianty
 
 .PHONY: all clean $(DIRS)
 
