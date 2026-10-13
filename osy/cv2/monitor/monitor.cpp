@@ -33,6 +33,7 @@
 #include <time.h>
 
 #include <unistd.h>
+#include <fcntl.h>        // open, O_RDONLY
 #include <sys/stat.h>
 
 #define BUFFER_SIZE    4096
