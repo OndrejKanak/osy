@@ -18,6 +18,12 @@ cv5/
 │   ├── kolona1.cpp   1. krok: 3 potomci, všichni přes exec
 │   ├── kolona2.cpp   2. krok: druhý potomek čísluje řádky sám
 │   └── kolona3.cpp   3. krok: volitelný výstupní soubor
+├── obraz/            ZADÁNÍ: oprava obrázku (rev | sort -n | cut | basenc | display)
+│   ├── myrev.cpp       vlastní rev
+│   ├── obraz1.cpp      bod 1: 4 příkazy přes exec
+│   ├── obraz2.cpp      bod 2: ./myrev místo rev
+│   ├── obraz3.cpp      bod 3: vlastní převod hex → bajty
+│   └── obraz4.cpp      bod 4: + display -
 └── varianty/         možná rozšíření pro skutečné zadání (viz varianty/README.md)
     ├── vlastni.hpp             vlastní nl, tr, head, grep, wc, uniq, sort
     ├── v1_ctyri_procesy.cpp    + čtvrtý potomek (head)
